@@ -48,7 +48,7 @@ const int track1Bottles[] = {0, 0, 0, 1, 2, 1, 0, 2, 1, 1, 0, // o claire de la 
 const int track1Times[] = {0,    333,  667,  1000, 1333, 2000, 2667, 3000, 3333, 3667, 4000,
                            5333, 5667, 6000, 6333, 6667, 7333, 8000, 8333, 8667, 9000, 9333, 10666};
 
-const int track2Bottles[] = {2, 1, 0, 1, 2, 2, 2, 1, 1, 1, 2, 4, 4, // mary had a little lamb - 4 bottles
+const int track2Bottles[] = {2, 1, 0, 1, 2, 2, 2, 1, 1, 1, 2, 3, 3, // mary had a little lamb - 4 bottles
                              2, 1, 0, 1, 2, 2, 2, 2, 1, 1, 2, 1, 0, -1}; 
 const int track2Times[] = {0,    250,  500,  750,  1000, 1250, 1500, 2000, 2250, 2500, 3000, 3250, 3500,
                            4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 8000};
@@ -71,7 +71,7 @@ Servo servo8;
 const int restAngle = 90;
 const int strikeAngleDelta = 8; // how much the servo has to turn from rest in order to strike the bottle
 const int strikeDuration = 40; // amount of milliseconds to set a servo to the strike position before beginning to retract it.
-const int servoOffsets[8] = {-2, 3, 10, 0, 5, 0, 0, 0}; // calibrated offsets to make sure each servo is aligned in spite of physical tolerances in the servo shafts.
+const int servoOffsets[8] = {4, 3, 1, 3, 1, 1, 1, 1}; // calibrated offsets to make sure each servo is aligned in spite of physical tolerances in the servo shafts.
 
 unsigned long now = 0; // for keeping track of the current time since the arduino booted, for all the servo strike timings
 unsigned long trackBeginTime = 0; // for keeping track of when the current track began playing. The individual notes are marked for the elapsed time at which they are played.
@@ -107,29 +107,29 @@ void resetFinishedServos() { // reset the angle of any servos whose striking sta
 void updateServoStates() { // based on which positions in the striking array are set to 1, change the physical state of servos to the striking angle, and the others to the retracted angle.
   resetFinishedServos();
   
-  if (striking[0]) {servo1.write(restAngle+strikeAngleDelta+servoOffsets[0]);} // the servo control is object-oriented, so I have to individually address each servo by name.
-  else {servo1.write(restAngle+servoOffsets[0]);}
+  if (striking[0]) {servo1.write(restAngle-strikeAngleDelta-servoOffsets[0]);} // the servo control is object-oriented, so I have to individually address each servo by name.
+  else {servo1.write(restAngle-servoOffsets[0]);}
 
-  if (striking[1]) {servo2.write(restAngle-strikeAngleDelta-servoOffsets[1]);} // every other servo has its added angle values flipped, because it is facing the opposite direction
-  else {servo2.write(restAngle-servoOffsets[1]);}
+  if (striking[1]) {servo2.write(restAngle+strikeAngleDelta+servoOffsets[1]);} // every other servo has its added angle values flipped, because it is facing the opposite direction
+  else {servo2.write(restAngle+servoOffsets[1]);}
 
-  if (striking[2]) {servo3.write(restAngle+strikeAngleDelta+servoOffsets[2]);}
-  else {servo3.write(restAngle+servoOffsets[2]);}
+  if (striking[2]) {servo3.write(restAngle-strikeAngleDelta-servoOffsets[2]);}
+  else {servo3.write(restAngle-servoOffsets[2]);}
 
-  if (striking[3]) {servo4.write(restAngle-strikeAngleDelta-servoOffsets[3]);}
-  else {servo4.write(restAngle-servoOffsets[3]);}
+  if (striking[3]) {servo4.write(restAngle+strikeAngleDelta+servoOffsets[3]);}
+  else {servo4.write(restAngle+servoOffsets[3]);}
 
-  if (striking[4]) {servo5.write(restAngle+strikeAngleDelta+servoOffsets[4]);}
-  else {servo5.write(restAngle+servoOffsets[4]);}
+  if (striking[4]) {servo5.write(restAngle-strikeAngleDelta-servoOffsets[4]);}
+  else {servo5.write(restAngle-servoOffsets[4]);}
 
-  if (striking[5]) {servo6.write(restAngle-strikeAngleDelta-servoOffsets[5]);}
-  else {servo6.write(restAngle-servoOffsets[5]);}
+  if (striking[5]) {servo6.write(restAngle+strikeAngleDelta+servoOffsets[5]);}
+  else {servo6.write(restAngle+servoOffsets[5]);}
 
-  if (striking[6]) {servo7.write(restAngle+strikeAngleDelta+servoOffsets[6]);}
-  else {servo7.write(restAngle+servoOffsets[6]);}
+  if (striking[6]) {servo7.write(restAngle-strikeAngleDelta-servoOffsets[6]);}
+  else {servo7.write(restAngle-servoOffsets[6]);}
 
-  if (striking[7]) {servo8.write(restAngle-strikeAngleDelta-servoOffsets[7]);}
-  else {servo8.write(restAngle-servoOffsets[7]);}
+  if (striking[7]) {servo8.write(restAngle+strikeAngleDelta+servoOffsets[7]);}
+  else {servo8.write(restAngle+servoOffsets[7]);}
 }
 
 int getNumberPad(int IrCmd) { // converts all the number pad hex codes into actual numbers corresponding to each button
@@ -221,14 +221,14 @@ int getTrackLength(int track) { // figure out what the last note of a track is b
 
 
 void setup() {
-  servo1.attach(2);
-  servo2.attach(3);
-  servo3.attach(4);
-  servo4.attach(5);
-  servo5.attach(8); // may have to move these servos to A0-A3 if the SPI pins are needed for radio communication
-  servo6.attach(9);
-  servo7.attach(10);
-  servo8.attach(11);
+  servo1.attach(3);
+  servo2.attach(4);
+  servo3.attach(5);
+  servo4.attach(8);
+  servo5.attach(9); // may have to move these servos to A0-A3 if the SPI pins are needed for radio communication
+  servo6.attach(10);
+  servo7.attach(11);
+  servo8.attach(2);
   pinMode(A0, INPUT_PULLUP);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
