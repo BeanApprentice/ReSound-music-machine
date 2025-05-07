@@ -16,7 +16,7 @@ enum remoteCommands { // clarify all the possible IR button hex codes, so that h
   TRACKFORWARD = 0x9,
   ZERO = 0x16,
   MINUS = 0x19,
-  CLEAR = 0xD,
+  CLOCK = 0xD, // used to activate timer mode (alternate idea: compose mode)
   ONE = 0xC,
   TWO = 0x18,
   THREE = 0x5E,
@@ -37,8 +37,8 @@ enum remoteCommands { // clarify all the possible IR button hex codes, so that h
 const int track00Bottles[16] = {2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2}; // test one bottle repeatedly for tuning
 const int track00Times[16] = {  0,100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500};
 
-const int track000Bottles[] = {0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7}; // chaos
-const int track000Times[] = {  0,0,0,0,0,0,0,0, 100,100,100,100,100,100,100,100, 200,200,200,200,200,200,200,200, 300,300,300,300,300,300,300,300, 400,400,400,400,400,400,400,400, 500,500,500,500,500,500,500,500, 600,600,600,600,600,600,600,600, 700,700,700,700,700,700,700,700, 800,800,800,800,800,800,800,800, 900,900,900,900,900,900,900,900, 1000,1000,1000,1000,1000,1000,1000,1000, 1100,1100,1100,1100,1100,1100,1100,1100, 1200,1200,1200,1200,1200,1200,1200,1200, 1300,1300,1300,1300,1300,1300,1300,1300, 1400,1400,1400,1400,1400,1400,1400,1400, 1500,1500,1500,1500,1500,1500,1500,1500};
+const int alarmBottles[] = {0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, 0,1,2,3,4,5,6,7, -1};
+const int alarmTimes[] = {  0,0,0,0,0,0,0,0, 100,100,100,100,100,100,100,100, 200,200,200,200,200,200,200,200, 300,300,300,300,300,300,300,300, 400,400,400,400,400,400,400,400, 500,500,500,500,500,500,500,500, 600,600,600,600,600,600,600,600, 700,700,700,700,700,700,700,700, 800,800,800,800,800,800,800,800, 900,900,900,900,900,900,900,900, 1000,1000,1000,1000,1000,1000,1000,1000, 1100,1100,1100,1100,1100,1100,1100,1100, 1200,1200,1200,1200,1200,1200,1200,1200, 1300,1300,1300,1300,1300,1300,1300,1300, 1400,1400,1400,1400,1400,1400,1400,1400, 1500,1500,1500,1500,1500,1500,1500,1500, 2400};
 
 const int track0Bottles[] = {0, 1,   2,   3,   4,    5,    6,    7,    6,    5,    4,    3,    2,    1,    0}; // test all the bottles
 const int track0Times[] = {  0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500};
@@ -59,7 +59,7 @@ const int track3Times[] = {};
 const int track4Bottles[] = {0, 7, 0, 7, 0, 7, 1, 0, 2,  3, 2, 3, 2, 1, 0, 7, 7, 0, 7, -1}; // unknown - 8 bottles
 const int track4Times[] = {0, 250, 500, 750, 1000, 1500, 2000, 2500, 3000,  4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 7000, 8000};
 
-Servo servo1;
+Servo servo1; // change these to 0-7 for a more streamlined nomenclature
 Servo servo2;
 Servo servo3;
 Servo servo4;
@@ -71,16 +71,28 @@ Servo servo8;
 const int restAngle = 90;
 const int strikeAngleDelta = 8; // how much the servo has to turn from rest in order to strike the bottle
 const int strikeDuration = 40; // amount of milliseconds to set a servo to the strike position before beginning to retract it.
-const int servoOffsets[8] = {4, 3, 1, 3, 1, 1, 1, 1}; // calibrated offsets to make sure each servo is aligned in spite of physical tolerances in the servo shafts.
+const int servoOffsets[8] = {7, 7, 1, 3, -6, 1, 1, -1}; // calibrated offsets to make sure each servo is aligned in spite of physical tolerances in the servo shafts.
 
 unsigned long now = 0; // for keeping track of the current time since the arduino booted, for all the servo strike timings
 unsigned long trackBeginTime = 0; // for keeping track of when the current track began playing. The individual notes are marked for the elapsed time at which they are played.
 unsigned int nextNote = 0; // for keeping track of which is the next index on the list to be played (once the time to play that note arrives). 
+
 bool playing = 0; // if this is true, then the program will play a track from the given arrays until the nextNote variable exceeds the length of the notes array of the selected track.
 bool looped = 0; // if true, then the track will loop indefinitely until this is false again.
+bool testMode = 0; // manually swing the servos using digits 1-8 on the numberpad
+bool timerMode = 0; // play an alarm sound after a user-selected delay
+bool timerRunning = 0;
+
 float playSpeed = 1.0; // change how fast the tracks play by multiplying or dividing the timestamps of each note by a certain factor.
 int selectedTrack = 0;
-bool signalRepeated = 0; // stored if the received signal is a repeat of itself (ie: if the user holds down one button on the remote)
+float oldSpeed = 1.0; // the alarm needs to change the user's selected track and playback speed, so remember their previous settings so they can be reset after the alarm ends
+int oldTrack = 0;
+
+unsigned int timerValue = 0; // the delay in minutes before the timer alarm rings
+unsigned long timerBeginTime = 0;
+
+
+bool buttonRisingEdge = 0; // if the user holds down a button on the remote, this value allows the program to distinguish between the first signal of that button press, and any subsequent signals from that same button press
 
 bool striking[8] = {0, 0, 0, 0, 0, 0, 0, 0}; // store whether any of the given servos are in the process of striking. The strike function sets a value within this array to 1, and a seperate function returns any 1s back to 0s after a certain time.
 unsigned long strikeTimes[8] = {0, 0, 0, 0, 0, 0, 0, 0}; // remember at what time a given servo began its strike, so that the retraction can be properly timed
@@ -174,6 +186,8 @@ unsigned long getNoteTime(int track, int index) { // returns the time at which t
       return track3Times[index];
     case 4:
       return track4Times[index];
+    case 9: // alarm sound cannot be selected by the number pad
+      return alarmTimes[index];
     default: // default output indicates that the selected track does not exist
       return 0;
   }
@@ -193,7 +207,9 @@ int getNotePosition(int track, int index) { // returns the position of the bottl
       return track3Bottles[index];
     case 4:
       return track4Bottles[index];
-    default: // default output indicates that the selected track does not exist
+    case 9:
+      return alarmBottles[index];
+    default:
       return -1;
   }
   
@@ -212,7 +228,9 @@ int getTrackLength(int track) { // figure out what the last note of a track is b
       return (sizeof(track3Times) / sizeof(track3Times[0]));
     case 4:
       return (sizeof(track4Times) / sizeof(track4Times[0]));
-    default: // default output indicates that the selected track does not exist
+    case 9:
+      return (sizeof(alarmTimes) / sizeof(alarmTimes[0]));
+    default:
       return -1;
   }
   
@@ -263,35 +281,74 @@ void loop() { // this program is NON-BLOCKING. Adding blocking code may cause ev
   if (IrReceiver.decode()) { // && IrReceiver.decodedIRData.protocol != UNKNOWN
     IrReceiver.resume(); // Enable receiving of the next value
     IRcommand = IrReceiver.decodedIRData.command;
-    signalRepeated = IrReceiver.decodedIRData.flags;
+    buttonRisingEdge = !IrReceiver.decodedIRData.flags;
 
     /*Serial.println(IRcommand);
     Serial.println(signalRepeated);
     Serial.println("");*/
+
+    /*if (buttonRisingEdge) {
+      Serial.print("Button just pressed");Serial.println("");
+    }*/
+  }
+  else {
+    buttonRisingEdge = 0; // if no signal is decoded, it means either that no button is being pressed, or the remote's signal is not reaching the receiver. Either way, reset the rising edge detector, because if it was previously known to be a rising edge, it MUST no longer be a rising edge after one repeat of the loop().
   }
 
 
 
-  if (IRcommand == PLUS && !signalRepeated) { // control the playback speed in any mode
-    playSpeed += 0.25;
-    if (playSpeed >= 2.0) {playSpeed = 2.0;}
-  }
-  if (IRcommand == MINUS && !signalRepeated) {
-    playSpeed -= 0.25;
-    if (playSpeed <= 0.25) {playSpeed = 0.25;}
-  }
+  bool startCondition = (looped || !digitalRead(A0) || ( IRcommand == PLAY && buttonRisingEdge )); // start conditions for regular music playing: either the song is looping, the onboard start button is pressed, or the remote control play button is clicked
+  bool alarmCondition = timerMode && timerRunning && !playing && (now-timerBeginTime >= timerValue*60000); // A condition that triggers an alternate version of the playing code so that the machine plays an alarm instead of its normal music. Multiply the timer value in minutes by 60k to get milliseconds.
 
-  if  (!playing) { // when the machine is not in playing mode, allow the user to select which track they want to be played
+  if (IRcommand == MENU) { // exit any current mode and reset some parameters if the menu button is pressed. The user cannot switch directly from one mode to another, and must instead go through the menu first, so any parameters from a mode that must get reset upon exiting will be reset here.
+    playing = 0;
+    looped = 0;
+    //playSpeed = 1.0;
+
+    testMode = 0;
+
+    // the alarm can be stopped at any time by pressing the menu button, or reset once it begins ringing by pressing the play button again. EDIT: ok, maybe just the menu button
+    if (timerMode) {
+      timerMode = 0; 
+      timerValue = 0;
+      timerRunning = 0; 
+
+      selectedTrack = oldTrack;
+      playSpeed = oldSpeed;
+    }
+    
+  }
+  
+  if  (!playing && !testMode && !timerMode) { // when the machine is in the menu, allow the user to select which track they want to be played
     if (getNumberPad(IRcommand) != -1) { // -1 is the default output of this function, if it reads no / an invalid input from the remote
       selectedTrack = getNumberPad(IRcommand);
     }
   }
+
+  if (!playing && IRcommand == PLUS && buttonRisingEdge) { // can only control the playback speed when not playing, otherwise the track will skip forward or backward due to how the track reading is programmed...
+    playSpeed += 0.25;
+    if (playSpeed >= 2.0) {playSpeed = 2.0;}
+    //Serial.print("Increasing playback speed to x"); Serial.print(playSpeed); Serial.println("");
+  }
+  if (!playing && IRcommand == MINUS && buttonRisingEdge) {
+    playSpeed -= 0.25;
+    if (playSpeed <= 0.25) {playSpeed = 0.25;}
+    //Serial.print("Decreasing playback speed to x"); Serial.print(playSpeed); Serial.println("");
+  }
+
   
-  if ( !playing && (looped || !digitalRead(A0) || ( IRcommand == PLAY && !signalRepeated )) ) { // start playing a track if a track is not currently playing, and one of the start conditions is met.
+  if (( !playing && !testMode && !timerMode && startCondition ) || alarmCondition) { // start playing a track if a mode is not currently running, and one of the start conditions is met... or if an alarm must be sounded
     trackBeginTime = now;
     nextNote = 0;
     playing = 1;
     //Serial.print("Starting song at ");Serial.print(now);Serial.println("ms");
+
+    if (alarmCondition) { // extra setup for the alarm
+      selectedTrack = 9; // track 10 is the alarm track, not selectable by the user through the numberpad
+      playSpeed = 1.0;
+      looped = 1;
+      //Serial.println("ALARM!");
+    }
   }
   
   if ( playing && ( (now-trackBeginTime) >= getNoteTime(selectedTrack, nextNote)/playSpeed) ) { // as the elapsed time progresses, the next note in the song will be periodically reached, at which point the command will be sent for the appropriate bottle to be struck, and the checkpoint will move forward by one note.
@@ -309,11 +366,43 @@ void loop() { // this program is NON-BLOCKING. Adding blocking code may cause ev
     looped = 1;
   }
 
-  if (playing && IRcommand == MENU) { // exit early and reset some parameters if the menu button is pressed
-    playing = 0;
-    looped = 0;
-    playSpeed = 1.0;
+  if (!playing && !testMode && !timerMode && IRcommand == TEST) {
+    testMode = 1;
   }
+
+  if (testMode && getNumberPad(IRcommand) >= 1 && getNumberPad(IRcommand) <= 8 && buttonRisingEdge) { // strike the bottle that the user selects
+    strikeBottle(getNumberPad(IRcommand)-1); // minus 1 because the bottles are indexed 0-7
+  }
+
+  if (!playing && !testMode && !timerMode && IRcommand == CLOCK) {
+    timerMode = 1;
+  }
+
+  if (timerMode && getNumberPad(IRcommand) != -1 && buttonRisingEdge) {
+    if (timerValue*10 + getNumberPad(IRcommand) > 1440) { // stop the timer value from exceeding 1 day
+      
+    }
+    else { // If the timer value is empty, it is replaced with the digit pressed. If it already has a number in it, it is multiplied by 10 before adding the next number into the units position.
+      timerValue = timerValue*10;
+      timerValue += getNumberPad(IRcommand);
+
+      //Serial.print("Timer set to ");Serial.print(timerValue);Serial.print("min");Serial.println("");
+    }
+  }
+
+  if (timerMode && IRcommand == PLAY && !timerRunning) { // begin the timer and let the user know by striking a bottle 
+    timerBeginTime = now;
+    timerRunning = 1;
+    oldTrack = selectedTrack;
+    oldSpeed = playSpeed;
+    strikeBottle(7);
+  }
+
+  /*if (timerMode && timerRunning) { // now-timerBeginTime >= timerValue*60000
+    Serial.print("Time elapsed: ");Serial.print(now-timerBeginTime);Serial.println("ms");
+    Serial.print("Target time: ");Serial.print(timerValue*60000);Serial.println("ms");
+    Serial.println("");
+  }*/
 
 
 
